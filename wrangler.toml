@@ -1,0 +1,12 @@
+name = "dragon-rakib-shortener"
+main = "src/worker.js"
+compatibility_date = "2026-11-19"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "dragon-rakib-db"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
