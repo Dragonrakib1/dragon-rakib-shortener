@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DRAGON RAKIB - URL Shortener</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#0b1020;color:#fff}
+header{padding:22px;text-align:center;background:#111a30;border-bottom:1px solid #263452}
+h1{margin:0;color:#39e6a0;font-size:27px}
+header p{color:#aebbd1}
+main{max-width:650px;margin:35px auto;padding:18px}
+.card{background:#151f36;padding:24px;border:1px solid #293957;border-radius:16px;margin-bottom:20px}
+h2{margin-top:0}
+input{width:100%;padding:14px;margin:8px 0;background:#0b1428;color:white;border:1px solid #394968;border-radius:9px}
+button{padding:13px 18px;border:0;border-radius:9px;background:#39e6a0;color:#06150f;font-weight:bold;cursor:pointer;margin:5px 3px}
+.secondary{background:#354461;color:white}
+#message{color:#39e6a0;overflow-wrap:anywhere}
+small{color:#aebbd1}
+.hidden{display:none}
+.stat{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #293957}
+footer{text-align:center;padding:25px;color:#9eabc1}
+</style>
+</head>
+<body>
+<header>
+<h1>🐉 DRAGON RAKIB</h1>
+<p>Smart • Fast • Simple URL Shortener</p>
+</header>
+
+<main>
+<section class="card">
+<h2>🔗 Create Short Link</h2>
+<input id="destination" type="url" placeholder="Paste your long URL (https://...)" />
+<button onclick="shorten()">Shorten URL</button>
+<p id="message"></p>
+</section>
+
+<section class="card" id="auth">
+<h2>👤 Account</h2>
+<input id="name" placeholder="Your name (registration only)">
+<input id="email" type="email" placeholder="Email address">
+<input id="password" type="password" placeholder="Password (10+ characters)">
+<button onclick="register()">Register</button>
+<button class="secondary" onclick="login()">Login</button>
+<p id="authMessage"></p>
+</section>
+
+<section class="card hidden" id="dashboard">
+<h2>📊 Dashboard</h2>
+<p id="welcome"></p>
+<div class="stat"><span>Total links</span><b id="links">0</b></div>
+<div class="stat"><span>Total clicks</span><b id="clicks">0</b></div>
+<div class="stat"><span>Earnings (USD)</span><b id="earnings">0</b></div>
+<button onclick="loadDashboard()">Refresh</button>
+<button class="secondary" onclick="logout()">Logout</button>
+<h3>Your links</h3>
+<div id="linkList">Loading...</div>
+</section>
+</main>
+
+<footer>© 2026 DRAGON RAKIB. All rights reserved.</footer>
+
+<script>
+let token = localStorage.getItem("dragon_token");
+
+async function api(path, method="GET", data=null) {
+  const headers = {};
+  if (token) headers.Authorization = "Bearer " + token;
+  if (data) headers["Content-Type"] = "application/json";
+  const response = await fetch("/api" + path, {
+    method, headers, body: data ? JSON.stringify(data) : undefined
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || "Request failed");
+  return result;
+}
+
+async function register() {
+  try {
+    const result = await api("/register","POST",{
+      name:document.getElementById("name").value,
+      email:document.getElementById("email").value,
+      password:document.getElementById("password").value
+    });
+    saveLogin(result);
+  } catch(e) { document.getElementById("authMessage").textContent=e.message; }
+}
+
+async function login() {
+  try {
+    const result = await api("/login","POST",{
+      email:document.getElementById("email").value,
+      password:document.getElementById("password").value
+    });
+    saveLogin(result);
+  } catch(e) { document.getElementById("authMessage").textContent=e.message; }
+}
+
+function saveLogin(result) {
+  token=result.token;
+  localStorage.setItem("dragon_token",token);
+  showDashboard(result.user);
+}
+
+async function shorten() {
+  try {
+    const result=await api("/links","POST",{
+      destination:document.getElementById("destination").value
+    });
+    document.getElementById("message").innerHTML=
+      'Your short link: <a style="color:#39e6a0" href="'+result.shortUrl+'" target="_blank">'+result.shortUrl+'</a> <button onclick="copyLink(\''+result.shortUrl+'\')">Copy</button>';
+    if(token) loadDashboard();
+  } catch(e) { document.getElementById("message").textContent=e.message; }
+}
+
+async function copyLink(link) {
+  await navigator.clipboard.writeText(link);
+  alert("Link copied!");
+}
+
+async function loadDashboard() {
+  try {
+    const [stats, data, me]=await Promise.all([
+      api("/analytics"),api("/links"),api("/me")
+    ]);
+    showDashboard(me.user);
+    document.getElementById("links").textContent=stats.links;
+    document.getElementById("clicks").textContent=stats.clicks;
+    document.getElementById("earnings").textContent=Number(stats.earnings).toFixed(2);
+    document.getElementById("linkList").innerHTML=(data.links||[]).map(item=>
+      '<div class="stat"><span>'+item.code+'</span><b>'+item.clicks+' clicks</b></div>'
+    ).join("") || "No links yet.";
+  } catch(e) { logout(); }
+}
+
+function showDashboard(user) {
+  document.getElementById("auth").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
+  document.getElementById("welcome").textContent="Welcome, "+user.name;
+  loadDashboard();
+}
+
+function logout() {
+  token=null;
+  localStorage.removeItem("dragon_token");
+  document.getElementById("auth").classList.remove("hidden");
+  document.getElementById("dashboard").classList.add("hidden");
+}
+
+if(token) loadDashboard();
+</script>
+</body>
+</html>
