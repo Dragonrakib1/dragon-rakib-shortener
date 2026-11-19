@@ -5,152 +5,397 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DRAGON RAKIB - URL Shortener</title>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#0b1020;color:#fff}
-header{padding:22px;text-align:center;background:#111a30;border-bottom:1px solid #263452}
-h1{margin:0;color:#39e6a0;font-size:27px}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#0b1020;
+  color:white;
+}
+header{
+  padding:24px 15px;
+  text-align:center;
+  background:#111a30;
+  border-bottom:1px solid #263452;
+}
+h1{margin:0;color:#39e6a0;font-size:28px}
 header p{color:#aebbd1}
-main{max-width:650px;margin:35px auto;padding:18px}
-.card{background:#151f36;padding:24px;border:1px solid #293957;border-radius:16px;margin-bottom:20px}
-h2{margin-top:0}
-input{width:100%;padding:14px;margin:8px 0;background:#0b1428;color:white;border:1px solid #394968;border-radius:9px}
-button{padding:13px 18px;border:0;border-radius:9px;background:#39e6a0;color:#06150f;font-weight:bold;cursor:pointer;margin:5px 3px}
+main{max-width:700px;margin:30px auto;padding:15px}
+.card{
+  background:#151f36;
+  padding:22px;
+  border:1px solid #293957;
+  border-radius:16px;
+  margin-bottom:20px;
+}
+h2{margin-top:0;color:#39e6a0}
+input{
+  width:100%;
+  padding:14px;
+  margin:8px 0;
+  background:#0b1428;
+  color:white;
+  border:1px solid #394968;
+  border-radius:9px;
+}
+button{
+  padding:13px 18px;
+  border:0;
+  border-radius:9px;
+  background:#39e6a0;
+  color:#06150f;
+  font-weight:bold;
+  cursor:pointer;
+  margin:5px 3px;
+}
 .secondary{background:#354461;color:white}
-#message{color:#39e6a0;overflow-wrap:anywhere}
-small{color:#aebbd1}
-.hidden{display:none}
-.stat{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #293957}
+.hidden{display:none!important}
+.message{overflow-wrap:anywhere;color:#39e6a0}
+.stat{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 0;
+  border-bottom:1px solid #293957;
+}
+.link-item{
+  padding:13px;
+  margin:10px 0;
+  background:#0b1428;
+  border-radius:9px;
+  overflow-wrap:anywhere;
+}
+.link-item a{color:#39e6a0}
 footer{text-align:center;padding:25px;color:#9eabc1}
 </style>
 </head>
+
 <body>
+
 <header>
-<h1>🐉 DRAGON RAKIB</h1>
-<p>Smart • Fast • Simple URL Shortener</p>
+  <h1>🐉 DRAGON RAKIB</h1>
+  <p>Smart • Fast • Simple URL Shortener</p>
 </header>
 
 <main>
-<section class="card">
-<h2>🔗 Create Short Link</h2>
-<input id="destination" type="url" placeholder="Paste your long URL (https://...)" />
-<button onclick="shorten()">Shorten URL</button>
-<p id="message"></p>
-</section>
 
-<section class="card" id="auth">
-<h2>👤 Account</h2>
-<input id="name" placeholder="Your name (registration only)">
-<input id="email" type="email" placeholder="Email address">
-<input id="password" type="password" placeholder="Password (10+ characters)">
-<button onclick="register()">Register</button>
-<button class="secondary" onclick="login()">Login</button>
-<p id="authMessage"></p>
-</section>
+  <!-- LOGIN / REGISTER -->
+  <section class="card" id="auth">
+    <h2>👤 Welcome to DRAGON RAKIB</h2>
 
-<section class="card hidden" id="dashboard">
-<h2>📊 Dashboard</h2>
-<p id="welcome"></p>
-<div class="stat"><span>Total links</span><b id="links">0</b></div>
-<div class="stat"><span>Total clicks</span><b id="clicks">0</b></div>
-<div class="stat"><span>Earnings (USD)</span><b id="earnings">0</b></div>
-<button onclick="loadDashboard()">Refresh</button>
-<button class="secondary" onclick="logout()">Logout</button>
-<h3>Your links</h3>
-<div id="linkList">Loading...</div>
-</section>
+    <input id="name" placeholder="Your Name (Register only)">
+
+    <input id="email" type="email"
+      placeholder="Email Address">
+
+    <input id="password" type="password"
+      placeholder="Password (10+ characters)">
+
+    <button id="registerBtn" onclick="register()">
+      Register
+    </button>
+
+    <button class="secondary" onclick="login()">
+      Login
+    </button>
+
+    <p id="authMessage" class="message"></p>
+  </section>
+
+
+  <!-- USER DASHBOARD -->
+  <section class="hidden" id="dashboard">
+
+    <div class="card">
+      <h2>📊 My Dashboard</h2>
+      <p id="welcome"></p>
+
+      <div class="stat">
+        <span>Total Links</span>
+        <b id="links">0</b>
+      </div>
+
+      <div class="stat">
+        <span>Total Clicks</span>
+        <b id="clicks">0</b>
+      </div>
+
+      <div class="stat">
+        <span>Earnings (USD)</span>
+        <b id="earnings">$0.00</b>
+      </div>
+
+      <button onclick="loadDashboard()">
+        Refresh Dashboard
+      </button>
+
+      <button class="secondary" onclick="logout()">
+        Logout
+      </button>
+    </div>
+
+
+    <!-- SHORT LINK OPTION: LOGIN ER POR -->
+    <div class="card">
+      <h2>🔗 Create Short Link</h2>
+
+      <input id="destination" type="url"
+        placeholder="Paste your long URL (https://...)">
+
+      <button id="shortenBtn" onclick="shorten()">
+        Shorten URL
+      </button>
+
+      <p id="shortMessage" class="message"></p>
+    </div>
+
+
+    <!-- USER LINKS -->
+    <div class="card">
+      <h2>📁 Your Links</h2>
+      <div id="linkList">Loading...</div>
+    </div>
+
+  </section>
+
 </main>
 
-<footer>© 2026 DRAGON RAKIB. All rights reserved.</footer>
+<footer>
+  © 2026 DRAGON RAKIB. All rights reserved.
+</footer>
+
 
 <script>
 let token = localStorage.getItem("dragon_token");
 
+const $ = id => document.getElementById(id);
+
 async function api(path, method="GET", data=null) {
   const headers = {};
-  if (token) headers.Authorization = "Bearer " + token;
-  if (data) headers["Content-Type"] = "application/json";
+
+  if (token) {
+    headers.Authorization = "Bearer " + token;
+  }
+
+  if (data) {
+    headers["Content-Type"] = "application/json";
+  }
+
   const response = await fetch("/api" + path, {
-    method, headers, body: data ? JSON.stringify(data) : undefined
+    method,
+    headers,
+    body: data ? JSON.stringify(data) : undefined
   });
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.error || "Request failed");
+
+  let result = {};
+
+  try {
+    result = await response.json();
+  } catch {}
+
+  if (!response.ok) {
+    throw new Error(result.error || "Request failed");
+  }
+
   return result;
 }
 
+
+// REGISTER
 async function register() {
+  $("authMessage").textContent = "Please wait...";
+
   try {
-    const result = await api("/register","POST",{
-      name:document.getElementById("name").value,
-      email:document.getElementById("email").value,
-      password:document.getElementById("password").value
+    const result = await api("/register", "POST", {
+      name: $("name").value.trim(),
+      email: $("email").value.trim(),
+      password: $("password").value
     });
+
     saveLogin(result);
-  } catch(e) { document.getElementById("authMessage").textContent=e.message; }
+
+  } catch(error) {
+    $("authMessage").textContent = error.message;
+  }
 }
 
+
+// LOGIN
 async function login() {
+  $("authMessage").textContent = "Logging in...";
+
   try {
-    const result = await api("/login","POST",{
-      email:document.getElementById("email").value,
-      password:document.getElementById("password").value
+    const result = await api("/login", "POST", {
+      email: $("email").value.trim(),
+      password: $("password").value
     });
+
     saveLogin(result);
-  } catch(e) { document.getElementById("authMessage").textContent=e.message; }
+
+  } catch(error) {
+    $("authMessage").textContent = error.message;
+  }
 }
 
+
+// SAVE LOGIN
 function saveLogin(result) {
-  token=result.token;
-  localStorage.setItem("dragon_token",token);
+  if (!result.token || !result.user) {
+    $("authMessage").textContent = "Login response error.";
+    return;
+  }
+
+  token = result.token;
+  localStorage.setItem("dragon_token", token);
+
   showDashboard(result.user);
-}
-
-async function shorten() {
-  try {
-    const result=await api("/links","POST",{
-      destination:document.getElementById("destination").value
-    });
-    document.getElementById("message").innerHTML=
-      'Your short link: <a style="color:#39e6a0" href="'+result.shortUrl+'" target="_blank">'+result.shortUrl+'</a> <button onclick="copyLink(\''+result.shortUrl+'\')">Copy</button>';
-    if(token) loadDashboard();
-  } catch(e) { document.getElementById("message").textContent=e.message; }
-}
-
-async function copyLink(link) {
-  await navigator.clipboard.writeText(link);
-  alert("Link copied!");
-}
-
-async function loadDashboard() {
-  try {
-    const [stats, data, me]=await Promise.all([
-      api("/analytics"),api("/links"),api("/me")
-    ]);
-    showDashboard(me.user);
-    document.getElementById("links").textContent=stats.links;
-    document.getElementById("clicks").textContent=stats.clicks;
-    document.getElementById("earnings").textContent=Number(stats.earnings).toFixed(2);
-    document.getElementById("linkList").innerHTML=(data.links||[]).map(item=>
-      '<div class="stat"><span>'+item.code+'</span><b>'+item.clicks+' clicks</b></div>'
-    ).join("") || "No links yet.";
-  } catch(e) { logout(); }
-}
-
-function showDashboard(user) {
-  document.getElementById("auth").classList.add("hidden");
-  document.getElementById("dashboard").classList.remove("hidden");
-  document.getElementById("welcome").textContent="Welcome, "+user.name;
   loadDashboard();
 }
 
-function logout() {
-  token=null;
-  localStorage.removeItem("dragon_token");
-  document.getElementById("auth").classList.remove("hidden");
-  document.getElementById("dashboard").classList.add("hidden");
+
+// SHOW DASHBOARD
+function showDashboard(user) {
+  $("auth").classList.add("hidden");
+  $("dashboard").classList.remove("hidden");
+
+  $("welcome").textContent =
+    "Welcome, " + user.name + " 🐉";
 }
 
-if(token) loadDashboard();
+
+// CREATE SHORT LINK
+async function shorten() {
+  const destination = $("destination").value.trim();
+
+  if (!destination) {
+    $("shortMessage").textContent =
+      "Please enter a URL.";
+    return;
+  }
+
+  $("shortMessage").textContent = "Creating link...";
+
+  try {
+    const result = await api("/links", "POST", {
+      destination
+    });
+
+    $("shortMessage").textContent = "";
+
+    const link = document.createElement("a");
+    link.href = result.shortUrl;
+    link.textContent = result.shortUrl;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+
+    const copy = document.createElement("button");
+    copy.textContent = "Copy Link";
+    copy.onclick = () => copyLink(result.shortUrl);
+
+    $("shortMessage").append(
+      document.createTextNode("Your Short Link: "),
+      link,
+      document.createTextNode(" "),
+      copy
+    );
+
+    $("destination").value = "";
+
+    await loadDashboard();
+
+  } catch(error) {
+    $("shortMessage").textContent = error.message;
+  }
+}
+
+
+// COPY LINK
+async function copyLink(link) {
+  try {
+    await navigator.clipboard.writeText(link);
+    alert("Short link copied!");
+  } catch {
+    prompt("Copy your link:", link);
+  }
+}
+
+
+// LOAD DASHBOARD
+async function loadDashboard() {
+  if (!token) return;
+
+  try {
+    const [stats, data, me] = await Promise.all([
+      api("/analytics"),
+      api("/links"),
+      api("/me")
+    ]);
+
+    showDashboard(me.user);
+
+    $("links").textContent = stats.links ?? 0;
+    $("clicks").textContent = stats.clicks ?? 0;
+
+    $("earnings").textContent =
+      "$" + Number(stats.earnings || 0).toFixed(2);
+
+    const list = $("linkList");
+    list.replaceChildren();
+
+    if (!data.links || data.links.length === 0) {
+      list.textContent = "No links created yet.";
+      return;
+    }
+
+    data.links.forEach(item => {
+      const box = document.createElement("div");
+      box.className = "link-item";
+
+      const link = document.createElement("a");
+      link.href = location.origin + "/" + item.code;
+      link.textContent = location.origin + "/" + item.code;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+
+      const clicks = document.createElement("p");
+      clicks.textContent = "Clicks: " + item.clicks;
+
+      const copy = document.createElement("button");
+      copy.textContent = "Copy";
+      copy.onclick = () => copyLink(link.href);
+
+      box.append(link, clicks, copy);
+      list.appendChild(box);
+    });
+
+  } catch(error) {
+    logout();
+    $("authMessage").textContent =
+      "Session expired. Please login again.";
+  }
+}
+
+
+// LOGOUT
+function logout() {
+  token = null;
+  localStorage.removeItem("dragon_token");
+
+  $("dashboard").classList.add("hidden");
+  $("auth").classList.remove("hidden");
+
+  $("password").value = "";
+  $("authMessage").textContent = "You have logged out.";
+}
+
+
+// CHECK EXISTING LOGIN
+if (token) {
+  loadDashboard();
+}
 </script>
+
 </body>
 </html>
