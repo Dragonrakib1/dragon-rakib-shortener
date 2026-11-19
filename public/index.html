@@ -69,6 +69,9 @@ button{
 }
 .link-item a{color:#39e6a0}
 footer{text-align:center;padding:25px;color:#9eabc1}
+.auth-tabs{display:flex;gap:8px;margin-bottom:18px}
+.auth-tabs button{flex:1}
+.auth-tabs .active{background:#39e6a0;color:#06150f}
 </style>
 </head>
 
@@ -81,85 +84,84 @@ footer{text-align:center;padding:25px;color:#9eabc1}
 
 <main>
 
-  <!-- LOGIN / REGISTER -->
-  <section class="card" id="auth">
-    <h2>👤 Welcome to DRAGON RAKIB</h2>
+<!-- LOGIN / REGISTER -->
+<section class="card" id="auth">
 
-    <input id="name" placeholder="Your Name (Register only)">
+  <h2>👤 Welcome to DRAGON RAKIB</h2>
 
-    <input id="email" type="email"
-      placeholder="Email Address">
+  <div class="auth-tabs">
+    <button id="loginTab" class="active"
+      onclick="showAuthMode('login')">Login</button>
 
-    <input id="password" type="password"
-      placeholder="Password (10+ characters)">
+    <button id="registerTab" class="secondary"
+      onclick="showAuthMode('register')">Register</button>
+  </div>
 
-    <button id="registerBtn" onclick="register()">
-      Register
+  <div id="nameField" class="hidden">
+    <input id="name" placeholder="Your Name">
+  </div>
+
+  <input id="email" type="email"
+    placeholder="Email Address">
+
+  <input id="password" type="password"
+    placeholder="Password">
+
+  <button id="authSubmit" onclick="login()">
+    Login
+  </button>
+
+  <p id="authMessage" class="message"></p>
+</section>
+
+
+<!-- DASHBOARD -->
+<section class="hidden" id="dashboard">
+
+  <div class="card">
+    <h2>📊 My Dashboard</h2>
+    <p id="welcome"></p>
+
+    <div class="stat">
+      <span>Total Links</span>
+      <b id="links">0</b>
+    </div>
+
+    <div class="stat">
+      <span>Total Clicks</span>
+      <b id="clicks">0</b>
+    </div>
+
+    <div class="stat">
+      <span>Earnings (USD)</span>
+      <b id="earnings">$0.00</b>
+    </div>
+
+    <button onclick="loadDashboard()">Refresh Dashboard</button>
+    <button class="secondary" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- SHORT LINK -->
+  <div class="card">
+    <h2>🔗 Create Short Link</h2>
+
+    <input id="destination" type="url"
+      placeholder="Paste your long URL (https://...)">
+
+    <button id="shortenBtn" onclick="shorten()">
+      Shorten URL
     </button>
 
-    <button class="secondary" onclick="login()">
-      Login
-    </button>
+    <p id="shortMessage" class="message"></p>
+  </div>
 
-    <p id="authMessage" class="message"></p>
-  </section>
+  <!-- USER LINKS -->
+  <div class="card">
+    <h2>📁 Your Links</h2>
+    <div id="linkList">Loading...</div>
+  </div>
 
-
-  <!-- USER DASHBOARD -->
-  <section class="hidden" id="dashboard">
-
-    <div class="card">
-      <h2>📊 My Dashboard</h2>
-      <p id="welcome"></p>
-
-      <div class="stat">
-        <span>Total Links</span>
-        <b id="links">0</b>
-      </div>
-
-      <div class="stat">
-        <span>Total Clicks</span>
-        <b id="clicks">0</b>
-      </div>
-
-      <div class="stat">
-        <span>Earnings (USD)</span>
-        <b id="earnings">$0.00</b>
-      </div>
-
-      <button onclick="loadDashboard()">
-        Refresh Dashboard
-      </button>
-
-      <button class="secondary" onclick="logout()">
-        Logout
-      </button>
-    </div>
-
-
-    <!-- SHORT LINK OPTION: LOGIN ER POR -->
-    <div class="card">
-      <h2>🔗 Create Short Link</h2>
-
-      <input id="destination" type="url"
-        placeholder="Paste your long URL (https://...)">
-
-      <button id="shortenBtn" onclick="shorten()">
-        Shorten URL
-      </button>
-
-      <p id="shortMessage" class="message"></p>
-    </div>
-
-
-    <!-- USER LINKS -->
-    <div class="card">
-      <h2>📁 Your Links</h2>
-      <div id="linkList">Loading...</div>
-    </div>
-
-  </section>
-
+</section>
 </main>
 
 <footer>
@@ -169,9 +171,12 @@ footer{text-align:center;padding:25px;color:#9eabc1}
 
 <script>
 let token = localStorage.getItem("dragon_token");
+let authMode = "login";
 
 const $ = id => document.getElementById(id);
 
+
+// API REQUEST
 async function api(path, method="GET", data=null) {
   const headers = {};
 
@@ -200,6 +205,30 @@ async function api(path, method="GET", data=null) {
   }
 
   return result;
+}
+
+
+// SWITCH LOGIN / REGISTER
+function showAuthMode(mode) {
+  authMode = mode;
+
+  const isRegister = mode === "register";
+
+  $("nameField").classList.toggle("hidden", !isRegister);
+
+  $("authSubmit").textContent =
+    isRegister ? "Create Account" : "Login";
+
+  $("authSubmit").onclick =
+    isRegister ? register : login;
+
+  $("loginTab").classList.toggle("active", !isRegister);
+  $("registerTab").classList.toggle("active", isRegister);
+
+  $("loginTab").classList.toggle("secondary", isRegister);
+  $("registerTab").classList.toggle("secondary", !isRegister);
+
+  $("authMessage").textContent = "";
 }
 
 
@@ -243,7 +272,8 @@ async function login() {
 // SAVE LOGIN
 function saveLogin(result) {
   if (!result.token || !result.user) {
-    $("authMessage").textContent = "Login response error.";
+    $("authMessage").textContent =
+      "Login response error.";
     return;
   }
 
@@ -275,12 +305,23 @@ async function shorten() {
     return;
   }
 
-  $("shortMessage").textContent = "Creating link...";
-
   try {
+    const parsed = new URL(destination);
+
+    if (!["http:", "https:"].includes(parsed.protocol)) {
+      throw new Error("Only HTTP and HTTPS URLs are allowed.");
+    }
+
+    $("shortMessage").textContent = "Creating link...";
+    $("shortenBtn").disabled = true;
+
     const result = await api("/links", "POST", {
       destination
     });
+
+    if (!result.shortUrl) {
+      throw new Error("Short link was not returned by server.");
+    }
 
     $("shortMessage").textContent = "";
 
@@ -307,6 +348,8 @@ async function shorten() {
 
   } catch(error) {
     $("shortMessage").textContent = error.message;
+  } finally {
+    $("shortenBtn").disabled = false;
   }
 }
 
@@ -332,6 +375,10 @@ async function loadDashboard() {
       api("/links"),
       api("/me")
     ]);
+
+    if (!me.user) {
+      throw new Error("Invalid user session.");
+    }
 
     showDashboard(me.user);
 
@@ -371,9 +418,16 @@ async function loadDashboard() {
     });
 
   } catch(error) {
-    logout();
+    console.error(error);
+
+    token = null;
+    localStorage.removeItem("dragon_token");
+
+    $("dashboard").classList.add("hidden");
+    $("auth").classList.remove("hidden");
+
     $("authMessage").textContent =
-      "Session expired. Please login again.";
+      "Session expired or dashboard error. Please login again.";
   }
 }
 
@@ -387,11 +441,20 @@ function logout() {
   $("auth").classList.remove("hidden");
 
   $("password").value = "";
+  $("name").value = "";
+  $("email").value = "";
+  $("destination").value = "";
+
+  $("shortMessage").textContent = "";
+
+  showAuthMode("login");
   $("authMessage").textContent = "You have logged out.";
 }
 
 
-// CHECK EXISTING LOGIN
+// START
+showAuthMode("login");
+
 if (token) {
   loadDashboard();
 }
